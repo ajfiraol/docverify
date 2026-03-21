@@ -2,6 +2,8 @@
 
 A Django-based system for uploading, managing, and verifying legal documents with role-based access control.
 
+> **Test PR for CI/CD** - This is a test pull request to demonstrate the CI workflow.
+
 ## Features
 
 - **Multi-role Authentication**: Regular Users, Institutions, Companies
