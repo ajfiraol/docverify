@@ -42,6 +42,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'documents:document_upload' %}">Upload Document</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'institutions:institution_list' %}">Institutions</a>
+                            </li>
                         {% elif user.is_institution %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'verification:pending_verifications' %}">Pending Verifications</a>

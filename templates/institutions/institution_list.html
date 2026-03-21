@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Institutions - DocVerify{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-bank"></i> Institutions</h1>
+    </div>
+
+    <p class="text-muted mb-4">
+        Below is a list of authorized institutions that can verify your documents.
+        These institutions are government-approved and can verify the authenticity of your legal documents.
+    </p>
+
+    {% if institutions %}
+        <div class="row">
+            {% for institution in institutions %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="bi bi-building text-primary"></i>
+                                {{ institution.username }}
+                            </h5>
+                            <p class="card-text text-muted">
+                                {% if institution.first_name or institution.last_name %}
+                                    {{ institution.first_name }} {{ institution.last_name }}
+                                {% else %}
+                                    Institution Representative
+                                {% endif %}
+                            </p>
+                            {% if institution.email %}
+                                <p class="mb-1">
+                                    <i class="bi bi-envelope"></i>
+                                    <a href="mailto:{{ institution.email }}">{{ institution.email }}</a>
+                                </p>
+                            {% endif %}
+                            {% if institution.phone %}
+                                <p class="mb-0">
+                                    <i class="bi bi-telephone"></i>
+                                    {{ institution.phone }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer bg-white">
+                            <span class="badge bg-success">
+                                <i class="bi bi-check-circle"></i> Verified Institution
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-bank display-1 text-muted"></i>
+            <h3 class="mt-3">No Institutions Found</h3>
+            <p class="text-muted">There are no verified institutions registered yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

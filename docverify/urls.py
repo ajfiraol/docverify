@@ -12,6 +12,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('documents/', include('documents.urls')),
     path('verification/', include('verification.urls')),
+    path('institutions/', include('institutions.urls')),
     path('', RedirectView.as_view(url='documents/', permanent=False), name='home'),
 ]
 
