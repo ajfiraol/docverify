@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Verification Result - DocVerify{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-check-circle-fill"></i> Document Verified
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <strong>Verification ID:</strong> {{ verification_id }}<br>
+                        <strong>Status:</strong> This document is verified and authentic.
+                    </div>
+
+                    <h5 class="mt-4">Document Details</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Document Title</th>
+                            <td>{{ document.title }}</td>
+                        </tr>
+                        <tr>
+                            <th>Document Type</th>
+                            <td>{{ document.get_document_type_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Owner</th>
+                            <td>{{ document.uploaded_by.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status</th>
+                            <td>
+                                <span class="badge bg-success">{{ document.get_status_display }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Verification Status</th>
+                            <td>
+                                <span class="badge bg-success">{{ document.get_verification_status_display }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Verified On</th>
+                            <td>{{ document.updated_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Verification ID Expires</th>
+                            <td>{{ document.verification_id_expires_at|date:"M d, Y H:i:s" }}</td>
+                        </tr>
+                    </table>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{% url 'verification:verify_by_id' %}" class="btn btn-primary">
+                            <i class="bi bi-arrow-repeat"></i> Verify Another Document
+                        </a>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                            Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

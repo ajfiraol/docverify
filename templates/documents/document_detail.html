@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ document.title }} - DocVerify{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">{{ document.title }}</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Document Type:</strong> {{ document.get_document_type_display }}</p>
+                    <p><strong>Status:</strong>
+                        <span class="badge bg-{% if document.status == 'approved' %}success{% elif document.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                            {{ document.get_status_display }}
+                        </span>
+                    </p>
+                    <p><strong>Verification Status:</strong>
+                        <span class="badge bg-{% if document.verification_status == 'verified' %}success{% elif document.verification_status == 'rejected' %}danger{% elif document.verification_status == 'pending' %}info{% else %}secondary{% endif %}">
+                            {{ document.get_verification_status_display }}
+                        </span>
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Uploaded:</strong> {{ document.created_at }}</p>
+                    <p><strong>Last Updated:</strong> {{ document.updated_at }}</p>
+                    {% if document.description %}
+                        <p><strong>Description:</strong> {{ document.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h5>Document File</h5>
+                {% if document.file %}
+                    <a href="{{ document.file.url }}" class="btn btn-primary" target="_blank">
+                        <i class="bi bi-file-earmark-arrow-down"></i> View/Download
+                    </a>
+                {% else %}
+                    <p class="text-muted">No file attached.</p>
+                {% endif %}
+            </div>
+
+            {% if document.verification_status == 'verified' %}
+            <div class="mt-4">
+                <h5><i class="bi bi-shield-check"></i> Verification ID</h5>
+                <div class="alert alert-info">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <p class="mb-0">
+                                <strong>Share this ID with companies to verify your document:</strong><br>
+                                <span class="h4 text-primary">{{ document.get_current_verification_id }}</span>
+                            </p>
+                            <small class="text-muted">
+                                Expires: {{ document.verification_id_expires_at|date:"M d, Y H:i:s" }}
+                            </small>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <form method="post" action="{% url 'documents:refresh_verification_id' document.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="bi bi-arrow-repeat"></i> Refresh ID
+                                </button>
+                            </form>
+                            <small class="text-muted d-block mt-1">ID changes every 5 minutes</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if document.verifications.all %}
+                <div class="mt-4">
+                    <h5>Verification History</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Verified By</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Notes</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for verification in document.verifications.all %}
+                                    <tr>
+                                        <td>{{ verification.verified_by.username }}</td>
+                                        <td>{{ verification.get_verification_type_display }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if verification.status == 'verified' %}success{% else %}danger{% endif %}">
+                                                {{ verification.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ verification.notes|default:"-" }}</td>
+                                        <td>{{ verification.verified_at|date:"M d, Y H:i" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'documents:document_list' %}" class="btn btn-secondary">Back to Documents</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

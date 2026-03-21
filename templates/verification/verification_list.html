@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}All Verifications - DocVerify{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">
+        <i class="bi bi-list-check"></i> All Document Verifications
+    </h1>
+
+    {% if verifications %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Document</th>
+                        <th>Type</th>
+                        <th>Verified By</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                        <th>Verified At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ver in verifications %}
+                        <tr>
+                            <td>{{ ver.document.title }}</td>
+                            <td>{{ ver.get_verification_type_display }}</td>
+                            <td>{{ ver.verified_by.username }}</td>
+                            <td>
+                                <span class="badge bg-{% if ver.status == 'verified' %}success{% else %}danger{% endif %}">
+                                    {{ ver.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ ver.notes|truncatewords:5|default:"-" }}</td>
+                            <td>{{ ver.verified_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-file-earmark-x display-1 text-muted"></i>
+            <h3 class="mt-3">No Verifications Yet</h3>
+            <p class="text-muted">No document verifications have been performed.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

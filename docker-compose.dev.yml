@@ -1,0 +1,30 @@
+# ===================================================================
+# docker-compose.dev.yml - Development Environment
+# ===================================================================
+# This configuration is for local development only.
+# It uses SQLite and mounts code for live reloading.
+#
+# Usage:
+#   docker-compose -f docker-compose.dev.yml up -d
+# ===================================================================
+
+services:
+  # -------------------------------------------------------------------------
+  # Django Development Server
+  # -------------------------------------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: docverify_dev
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SECRET_KEY=dev-secret-key-do-not-use-in-production
+      - DJANGO_DEBUG=True
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+    volumes:
+      - .:/app
+    command: python manage.py runserver 0.0.0.0:8000
+    stdin_open: true
+    tty: true

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Document - DocVerify{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4">
+                        <i class="bi bi-shield-check"></i> Verify Document
+                    </h2>
+                    <p class="text-muted text-center mb-4">
+                        Enter the verification ID provided by the document owner to verify its authenticity.
+                    </p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_verification_id" class="form-label">Verification ID</label>
+                            <input type="text" name="verification_id" id="id_verification_id"
+                                   class="form-control form-control-lg text-uppercase"
+                                   placeholder="e.g., A1B2C3D4E5F6"
+                                   required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Verify Document
+                            </button>
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="mt-3 text-center">
+                <small class="text-muted">
+                    Note: Verification IDs expire after 5 minutes for security.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

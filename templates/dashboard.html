@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - DocVerify{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Welcome, {{ user.username }}!</h1>
+    <p class="text-muted">Role: <span class="badge bg-secondary">{{ user.get_role_display }}</span></p>
+
+    <div class="row mt-4">
+        {% if user.is_regular_user %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-file-earmark-text"></i> My Documents
+                        </h5>
+                        <p class="card-text text-muted">View and manage your uploaded documents.</p>
+                        <a href="{% url 'documents:document_list' %}" class="btn btn-primary">View Documents</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-upload"></i> Upload Document
+                        </h5>
+                        <p class="card-text text-muted">Upload a new legal document for verification.</p>
+                        <a href="{% url 'documents:document_upload' %}" class="btn btn-success">Upload</a>
+                    </div>
+                </div>
+            </div>
+        {% elif user.is_institution %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-clock-history"></i> Pending Verifications
+                        </h5>
+                        <p class="card-text text-muted">Review documents waiting for verification.</p>
+                        <a href="{% url 'verification:pending_verifications' %}" class="btn btn-primary">View Pending</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-list-check"></i> All Verifications
+                        </h5>
+                        <p class="card-text text-muted">View all document verification records.</p>
+                        <a href="{% url 'verification:verification_list' %}" class="btn btn-success">View All</a>
+                    </div>
+                </div>
+            </div>
+        {% elif user.is_company %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-search"></i> Request Verification
+                        </h5>
+                        <p class="card-text text-muted">Submit a document for verification.</p>
+                        <a href="{% url 'verification:request_verification' %}" class="btn btn-primary">Request</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-clock-history"></i> My Requests
+                        </h5>
+                        <p class="card-text text-muted">View status of your verification requests.</p>
+                        <a href="{% url 'verification:my_requests' %}" class="btn btn-success">View Requests</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,162 @@
+# ===================================================================
+# CD Workflow - Continuous Deployment
+# ===================================================================
+# This workflow deploys the application when code is pushed to main.
+# It builds and pushes Docker images, then deploys to your VPS.
+#
+# Triggers:
+#   - Push to main branch
+#
+# What it does:
+#   1. Builds Docker image
+#   2. Pushes to Docker Hub / GHCR
+#   3. SSH into VPS and pulls latest image
+#   4. Runs migrations and restarts services
+#
+# Secrets Required (GitHub > Settings > Secrets):
+#   - DOCKER_USERNAME: Docker Hub username
+#   - DOCKER_PASSWORD: Docker Hub password
+#   - VPS_HOST: Your VPS IP address
+#   - VPS_SSH_KEY: Private SSH key
+#   - VPS_USER: SSH user (usually root)
+# ===================================================================
+
+name: CD - Deploy to VPS
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:  # Allow manual deployment
+
+jobs:
+  # -------------------------------------------------------------------------
+  # Build and Push Docker Image
+  # -------------------------------------------------------------------------
+  build-and-push:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      # ---------------------------------------------------------------------
+      # Checkout Code
+      # ---------------------------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ---------------------------------------------------------------------
+      # Set up Docker Buildx
+      # ---------------------------------------------------------------------
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ---------------------------------------------------------------------
+      # Extract Metadata
+      # ---------------------------------------------------------------------
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+            docverify/docverify
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      # ---------------------------------------------------------------------
+      # Login to GitHub Container Registry
+      # ---------------------------------------------------------------------
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # ---------------------------------------------------------------------
+      # Login to Docker Hub (optional)
+      # ---------------------------------------------------------------------
+      - name: Login to Docker Hub
+        if: secrets.DOCKER_PASSWORD != ''
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # ---------------------------------------------------------------------
+      # Build and Push Image
+      # ---------------------------------------------------------------------
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # -------------------------------------------------------------------------
+  # Deploy to VPS
+  # -------------------------------------------------------------------------
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+      # ---------------------------------------------------------------------
+      # Checkout Deployment Scripts
+      # ---------------------------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+             deploy.sh
+          sparse-checkout-cone-mode: false
+
+      # ---------------------------------------------------------------------
+      # Deploy via SSH
+      # ---------------------------------------------------------------------
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            # Variables from GitHub
+            IMAGE_TAG="${{ needs.build-and-push.outputs.image-tag }}"
+            echo "Deploying image: $IMAGE_TAG"
+
+            # Create deployment directory
+            mkdir -p ~/docverify
+
+            # Pull latest docker-compose.yml
+            curl -s "https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml" > ~/docverify/docker-compose.yml
+            curl -s "https://raw.githubusercontent.com/${{ github.repository }}/main/.env.example" > ~/docverify/.env
+
+            # Create .env if not exists
+            if [ ! -f ~/docverify/.env ]; then
+              cp ~/docverify/.env.example ~/docverify/.env
+            fi
+
+            # Update image tag in docker-compose
+            sed -i "s|image:.*|image: $IMAGE_TAG|" ~/docverify/docker-compose.yml
+
+            # Pull new image
+            docker pull $IMAGE_TAG
+
+            # Run migrations
+            docker compose -f ~/docverify/docker-compose.yml run --rm web python manage.py migrate --noinput
+
+            # Restart services
+            docker compose -f ~/docverify/docker-compose.yml up -d --build
+
+            echo "Deployment completed!"
+            docker compose -f ~/docverify/docker-compose.yml ps

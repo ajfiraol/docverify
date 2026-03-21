@@ -1,0 +1,33 @@
+# ===================================================================
+# requirements.txt - DocVerify Dependencies
+# ===================================================================
+# This file lists all Python dependencies required by the Django
+# application. Used by pip to install packages.
+# ===================================================================
+
+# Django Framework
+Django>=4.2,<5.0
+
+# Database
+psycopg2-binary>=2.9.9  # PostgreSQL adapter (use psycopg2 for production)
+
+# Production Server
+gunicorn>=21.2.0  # WSGI HTTP server
+whitenoise>=6.6.0  # Static file serving
+
+# Forms & UI
+crispy-bootstrap5>=0.8
+django-crispy-forms>=2.1
+
+# Image handling
+Pillow>=10.0.0
+
+# Security
+django-secure>=1.0.1
+python-dotenv>=1.0.0
+
+# Development/Testing (optional)
+# pytest>=7.4.0
+# pytest-django>=4.5.0
+# black>=23.0.0
+# flake8>=6.0.0

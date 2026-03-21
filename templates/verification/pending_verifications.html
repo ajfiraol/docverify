@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Verifications - DocVerify{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">
+        <i class="bi bi-clock-history"></i> Pending Verifications
+    </h1>
+
+    {% if documents %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Uploaded By</th>
+                        <th>Status</th>
+                        <th>Uploaded</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documents %}
+                        <tr>
+                            <td>{{ doc.title }}</td>
+                            <td>{{ doc.get_document_type_display }}</td>
+                            <td>{{ doc.uploaded_by.username }}</td>
+                            <td>
+                                <span class="badge bg-{% if doc.status == 'approved' %}success{% elif doc.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                                    {{ doc.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ doc.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <a href="{% url 'verification:verify_document' doc.pk %}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-check-circle"></i> Verify
+                                </a>
+                                <a href="{{ doc.file.url }}" class="btn btn-sm btn-info" target="_blank">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-check-circle display-1 text-success"></i>
+            <h3 class="mt-3">No Pending Verifications</h3>
+            <p class="text-muted">All documents have been verified.</p>
+            <a href="{% url 'verification:verification_list' %}" class="btn btn-primary mt-2">
+                View All Verifications
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

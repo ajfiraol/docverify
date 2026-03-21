@@ -1,0 +1,96 @@
+# ===================================================================
+# docker-compose.yml - DocVerify Production Deployment
+# ===================================================================
+# This configuration deploys DocVerify with PostgreSQL database
+# and Nginx reverse proxy for production use.
+#
+# Usage:
+#   docker-compose up -d          # Start services
+#   docker-compose logs -f       # View logs
+#   docker-compose down           # Stop services
+# ===================================================================
+
+services:
+  # -------------------------------------------------------------------------
+  # Django Application
+  # -------------------------------------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: docverify_web
+    restart: unless-stopped
+    environment:
+      # Database configuration
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-docverify}:${POSTGRES_PASSWORD:-docverify123}@db:5432/${POSTGRES_DB:-docverify}
+      # Django settings
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-change-this-in-production}
+      - DJANGO_DEBUG=False
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:-localhost}
+      - DJANGO_SETTINGS_MODULE=docverify.settings
+    volumes:
+      - media_volume:/app/media
+      - static_volume:/app/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - docverify_network
+
+  # -------------------------------------------------------------------------
+  # PostgreSQL Database
+  # -------------------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: docverify_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-docverify}
+      - POSTGRES_USER=${POSTGRES_USER:-docverify}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-docverify123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-docverify}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - docverify_network
+
+  # -------------------------------------------------------------------------
+  # Nginx Reverse Proxy
+  # -------------------------------------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: docverify_nginx
+    restart: unless-stopped
+    ports:
+      - "${NGINX_PORT:-80}:80"
+      - "${NGINX_SSL_PORT:-443}:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/app/staticfiles:ro
+      - media_volume:/app/media:ro
+    depends_on:
+      - web
+    networks:
+      - docverify_network
+
+# ===================================================================
+# Networks
+# ===================================================================
+networks:
+  docverify_network:
+    driver: bridge
+
+# ===================================================================
+# Volumes
+# ===================================================================
+volumes:
+  postgres_data:
+    driver: local
+  media_volume:
+    driver: local
+  static_volume:
+    driver: local

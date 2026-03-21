@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Document - DocVerify{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Document Details</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Title:</strong> {{ document.title }}</p>
+                    <p><strong>Type:</strong> {{ document.get_document_type_display }}</p>
+                    <p><strong>Uploaded By:</strong> {{ document.uploaded_by.username }}</p>
+                    <p><strong>Description:</strong> {{ document.description|default:"No description" }}</p>
+                    <p><strong>Current Status:</strong>
+                        <span class="badge bg-{% if document.status == 'approved' %}success{% elif document.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                            {{ document.get_status_display }}
+                        </span>
+                    </p>
+                    <p><strong>Uploaded:</strong> {{ document.created_at }}</p>
+                    <a href="{{ document.file.url }}" class="btn btn-info" target="_blank">
+                        <i class="bi bi-eye"></i> View Document
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Verify Document</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label">
+                                    {{ field.label }}
+                                    {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {{ field.errors }}
+                                {{ field }}
+                                {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-check-circle"></i> Submit Verification
+                            </button>
+                            <a href="{% url 'verification:pending_verifications' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

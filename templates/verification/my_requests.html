@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}My Verification Requests - DocVerify{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-clock-history"></i> My Verification Requests</h1>
+        <a href="{% url 'verification:request_verification' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> New Request
+        </a>
+    </div>
+
+    {% if requests %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Document</th>
+                        <th>Purpose</th>
+                        <th>Status</th>
+                        <th>Requested</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                        <tr>
+                            <td>{{ req.document.title }}</td>
+                            <td>{{ req.purpose|truncatewords:10 }}</td>
+                            <td>
+                                <span class="badge bg-{% if req.status == 'approved' or req.status == 'completed' %}success{% elif req.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                                    {{ req.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ req.created_at|date:"M d, Y" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-file-earmark-x display-1 text-muted"></i>
+            <h3 class="mt-3">No Verification Requests</h3>
+            <p class="text-muted">You haven't made any verification requests yet.</p>
+            <a href="{% url 'verification:request_verification' %}" class="btn btn-primary mt-2">
+                Request Verification
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
