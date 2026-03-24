@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}System Status - DocVerify{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-speedometer2"></i> DocVerify System Status</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <h5><i class="bi bi-check-circle-fill"></i> All Systems Operational</h5>
+                        <p class="mb-0">DocVerify is running normally. All services are available.</p>
+                    </div>
+
+                    <h5 class="mt-4">Service Status</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Status</th>
+                                <th>Response Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><i class="bi bi-globe"></i> Web Application</td>
+                                <td><span class="badge bg-success">Operational</span></td>
+                                <td><span id="response-time">--</span>ms</td>
+                            </tr>
+                            <tr>
+                                <td><i class="bi bi-database"></i> Database</td>
+                                <td><span class="badge bg-success">Operational</span></td>
+                                <td><span id="db-time">--</span>ms</td>
+                            </tr>
+                            <tr>
+                                <td><i class="bi bi-cloud"></i> API</td>
+                                <td><span class="badge bg-success">Operational</span></td>
+                                <td><span id="api-time">--</span>ms</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h5 class="mt-4">System Information</h5>
+                    <table class="table table-sm">
+                        <tr>
+                            <th>Version</th>
+                            <td>1.0.0</td>
+                        </tr>
+                        <tr>
+                            <th>Environment</th>
+                            <td>Production</td>
+                        </tr>
+                        <tr>
+                            <th>Last Updated</th>
+                            <td>{{ last_update }}</td>
+                        </tr>
+                    </table>
+
+                    <div class="text-center mt-4">
+                        <button class="btn btn-primary" onclick="checkStatus()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5><i class="bi bi-question-circle"></i> Need Help?</h5>
+                    <p class="text-muted">
+                        If you're experiencing issues, please contact support or check our
+                        <a href="#">documentation</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function checkStatus() {
+    const startTime = performance.now();
+
+    fetch('/health/detailed/')
+        .then(response => response.json())
+        .then(data => {
+            const endTime = performance.now();
+            const responseTime = Math.round(endTime - startTime);
+            document.getElementById('response-time').textContent = responseTime;
+
+            // Update database status
+            if (data.checks && data.checks.database === 'ok') {
+                document.querySelector('tbody tr:nth-child(2) td:nth-child(2)').innerHTML = '<span class="badge bg-success">Operational</span>';
+            } else {
+                document.querySelector('tbody tr:nth-child(2) td:nth-child(2)').innerHTML = '<span class="badge bg-danger">Degraded</span>';
+            }
+
+            // Update overall status
+            if (data.status === 'ok') {
+                document.querySelector('.alert').className = 'alert alert-success';
+                document.querySelector('.alert').innerHTML = '<h5><i class="bi bi-check-circle-fill"></i> All Systems Operational</h5><p class="mb-0">DocVerify is running normally. All services are available.</p>';
+            } else {
+                document.querySelector('.alert').className = 'alert alert-warning';
+                document.querySelector('.alert').innerHTML = '<h5><i class="bi bi-exclamation-triangle-fill"></i> Some Services Degraded</h5><p class="mb-0">Some services may be experiencing issues.</p>';
+            }
+        })
+        .catch(error => {
+            document.querySelector('.alert').className = 'alert alert-danger';
+            document.querySelector('.alert').innerHTML = '<h5><i class="bi bi-x-circle-fill"></i> System Unavailable</h5><p class="mb-0">Unable to connect to the server.</p>';
+        });
+}
+
+// Check status on page load
+checkStatus();
+</script>
+{% endblock %}

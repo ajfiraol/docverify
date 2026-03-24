@@ -180,3 +180,30 @@ LOGGING = {
 # Create logs directory if it doesn't exist
 LOG_DIR = os.path.join(BASE_DIR, 'logs')
 os.makedirs(LOG_DIR, exist_ok=True)
+
+# ===================================================================
+# Sentry Error Tracking
+# ===================================================================
+# Free error tracking at https://sentry.io
+# Set SENTRY_DSN environment variable to enable
+# ===================================================================
+SENTRY_DSN = os.environ.get('SENTRY_DSN', '')
+
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(),
+        ],
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # Set to 0.1 (10%) in production
+        traces_sample_rate=0.1 if not DEBUG else 1.0,
+        # Include paths to capture code context
+        include_local_variables=True,
+        # Environment
+        environment='production' if not DEBUG else 'development',
+    )

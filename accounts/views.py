@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib import messages
 from django.views.generic import TemplateView
+from django.utils import timezone
 from .forms import CustomUserCreationForm
 
 
@@ -36,3 +37,10 @@ def dashboard(request):
         return redirect('documents:document_list')
 
     return render(request, 'dashboard.html')
+
+
+def status_page(request):
+    """Public status page."""
+    return render(request, 'status.html', {
+        'last_update': timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+    })

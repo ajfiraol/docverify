@@ -26,6 +26,9 @@ Pillow>=10.0.0
 django-secure>=1.0.1
 python-dotenv>=1.0.0
 
+# Monitoring
+sentry-sdk>=1.39.0  # Error tracking (free tier at sentry.io)
+
 # Development/Testing (optional)
 # pytest>=7.4.0
 # pytest-django>=4.5.0
