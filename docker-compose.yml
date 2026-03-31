@@ -76,14 +76,6 @@ services:
     networks:
       - docverify_network
 
-volumes:
-  letsencrypt:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /etc/letsencrypt
-
 # ===================================================================
 # Networks
 # ===================================================================
@@ -95,6 +87,12 @@ networks:
 # Volumes
 # ===================================================================
 volumes:
+  letsencrypt:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /etc/letsencrypt
   postgres_data:
     driver: local
   media_volume:
