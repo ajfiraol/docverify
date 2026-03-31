@@ -15,9 +15,7 @@ services:
   # Django Application
   # -------------------------------------------------------------------------
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: PLACEHOLDER_IMAGE_TAG
     container_name: docverify_web
     restart: unless-stopped
     environment:
