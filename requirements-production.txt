@@ -17,7 +17,7 @@ whitenoise>=6.6.0
 # Redis & Celery
 redis>=5.0.0
 celery>=5.3.0
-django-celery Beat>=2.5  # For scheduled tasks
+django-celery-beat>=2.5  # For scheduled tasks
 
 # Forms & UI
 crispy-bootstrap5>=0.8
