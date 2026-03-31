@@ -25,7 +25,7 @@ name: CD - Deploy to VPS
 
 on:
   push:
-    branches: [main, master]
+    branches: ["*"]
   workflow_dispatch:  # Allow manual deployment
 
 jobs:
@@ -80,16 +80,6 @@ jobs:
 
     steps:
       # ---------------------------------------------------------------------
-      # Checkout Deployment Scripts
-      # ---------------------------------------------------------------------
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-             deploy.sh
-          sparse-checkout-cone-mode: false
-
-      # ---------------------------------------------------------------------
       # Deploy via SSH
       # ---------------------------------------------------------------------
       - name: Deploy to VPS
@@ -134,10 +124,16 @@ EOF
             docker compose -f ~/docverify/docker-compose.yml up -d
 
             # Wait for db to be ready
-            sleep 10
+            echo "Waiting for database..."
+            sleep 15
+
+            # Check if web container is running
+            docker compose -f ~/docverify/docker-compose.yml ps
 
             # Run migrations
-            docker compose -f ~/docverify/docker-compose.yml exec -T web python manage.py migrate --noinput || echo "Migration skipped or failed"
+            echo "Running migrations..."
+            docker compose -f ~/docverify/docker-compose.yml exec -T web python manage.py migrate --noinput || echo "Migration done or skipped"
 
             echo "Deployment completed!"
             docker compose -f ~/docverify/docker-compose.yml ps
+            echo "Done!"
