@@ -102,7 +102,7 @@ jobs:
             mkdir -p ~/docverify
 
             # Pull latest docker-compose.yml
-            curl -s "https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml" > ~/docverify/docker-compose.yml
+            curl -s "https://raw.githubusercontent.com/${{ github.repository }}/master/docker-compose.yml" > ~/docverify/docker-compose.yml
 
             # Create .env with actual values
             echo "DJANGO_SECRET_KEY=production-secret-key-12345678" > ~/docverify/.env
