@@ -1,0 +1,21 @@
+[Unit]
+Description=DocVerify Django Application
+After=network.target postgresql.service redis-server.service
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/docverify
+Environment="PATH=/opt/docverify/venv/bin:/usr/local/bin:/usr/bin:/bin"
+EnvironmentFile=/opt/docverify/.env
+ExecStart=/opt/docverify/venv/bin/gunicorn --bind unix:/tmp/docverify.sock --workers 4 --threads 2 --timeout 120 docverify.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

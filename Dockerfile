@@ -37,7 +37,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
-COPY requirements.txt .
+# Use requirements-production.txt for production (includes Redis & Celery)
+COPY requirements-production.txt requirements.txt
 
 # -----------------------------------------------------------------------------
 # Stage 2: Dependencies
