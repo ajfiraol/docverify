@@ -50,18 +50,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       # ---------------------------------------------------------------------
-      # Extract Metadata
-      # ---------------------------------------------------------------------
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ secrets.DOCKER_USERNAME }}/docverify
-          tags: |
-            type=sha
-            type=raw,value=latest
-
-      # ---------------------------------------------------------------------
       # Login to Docker Hub
       # ---------------------------------------------------------------------
       - name: Login to Docker Hub
@@ -78,7 +66,9 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/docverify:latest
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/docverify:latest
+            ${{ secrets.DOCKER_USERNAME }}/docverify:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
