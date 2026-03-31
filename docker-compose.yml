@@ -15,7 +15,7 @@ services:
   # Django Application
   # -------------------------------------------------------------------------
   web:
-    image: PLACEHOLDER_IMAGE_TAG
+    image: docverify/docverify:latest
     container_name: docverify_web
     restart: unless-stopped
     environment:

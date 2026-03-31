@@ -58,8 +58,8 @@ jobs:
         with:
           images: ${{ secrets.DOCKER_USERNAME }}/docverify
           tags: |
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha
+            type=raw,value=latest
 
       # ---------------------------------------------------------------------
       # Login to Docker Hub
@@ -78,8 +78,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ secrets.DOCKER_USERNAME }}/docverify:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -114,10 +113,9 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           script: |
-            # Build image tag using branch and SHA
+            # Use latest tag
             DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}"
-            SHORT_SHA="${{ github.sha }}"
-            IMAGE_TAG="$DOCKER_USERNAME/docverify:master-$SHORT_SHA"
+            IMAGE_TAG="$DOCKER_USERNAME/docverify:latest"
             echo "Deploying image: $IMAGE_TAG"
 
             # Create deployment directory
@@ -132,9 +130,6 @@ jobs:
               cp ~/docverify/.env.example ~/docverify/.env
             fi
 
-            # Update image tag in docker-compose
-            sed -i "s|image:.*|image: $IMAGE_TAG|" ~/docverify/docker-compose.yml
-
             # Pull new image
             docker pull "$IMAGE_TAG"
 
@@ -142,7 +137,7 @@ jobs:
             docker compose -f ~/docverify/docker-compose.yml run --rm web python manage.py migrate --noinput
 
             # Restart services
-            docker compose -f ~/docverify/docker-compose.yml up -d --build
+            docker compose -f ~/docverify/docker-compose.yml up -d
 
             echo "Deployment completed!"
             docker compose -f ~/docverify/docker-compose.yml ps
