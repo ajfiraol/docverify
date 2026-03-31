@@ -15,9 +15,11 @@ services:
   # Django Application
   # -------------------------------------------------------------------------
   web:
-    image: docverify/docverify:latest
+    image: REPLACE_IMAGE
     container_name: docverify_web
     restart: unless-stopped
+    ports:
+      - "8000:8000"
     environment:
       # Database configuration
       - DATABASE_URL=postgresql://${POSTGRES_USER:-docverify}:${POSTGRES_PASSWORD:-docverify123}@db:5432/${POSTGRES_DB:-docverify}
