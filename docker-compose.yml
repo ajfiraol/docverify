@@ -15,11 +15,9 @@ services:
   # Django Application
   # -------------------------------------------------------------------------
   web:
-    image: REPLACE_IMAGE
+    image: docverify/docverify:latest
     container_name: docverify_web
     restart: unless-stopped
-    ports:
-      - "8000:8000"
     environment:
       # Database configuration
       - DATABASE_URL=postgresql://${POSTGRES_USER:-docverify}:${POSTGRES_PASSWORD:-docverify123}@db:5432/${POSTGRES_DB:-docverify}
@@ -66,10 +64,13 @@ services:
     container_name: docverify_nginx
     restart: unless-stopped
     ports:
-      - "${NGINX_PORT:-80}:80"
+      - "80:80"
+      - "443:443"
     volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - static_volume:/app/staticfiles:ro
       - media_volume:/app/media:ro
+      - /etc/letsencrypt/live/test.eventaxiss.com:/etc/letsencrypt/live/test.eventaxiss.com:ro
     depends_on:
       - web
     networks:
