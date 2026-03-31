@@ -66,16 +66,37 @@ TEMPLATES = [
 WSGI_APPLICATION = 'docverify.wsgi.application'
 
 # Database
-DATABASES = {
-    'default': {
+def parse_database_url(url):
+    """Parse DATABASE_URL into Django database config dict."""
+    if not url:
+        return None
+    # Format: postgresql://user:password@host:port/dbname
+    from urllib.parse import urlparse
+    parsed = urlparse(url)
+    return {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB', 'docverify'),
-        'USER': os.environ.get('POSTGRES_USER', 'docverify'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
-        'HOST': os.environ.get('DATABASE_HOST', 'localhost'),
-        'PORT': os.environ.get('DATABASE_PORT', '5432'),
+        'NAME': parsed.path.lstrip('/'),
+        'USER': parsed.username,
+        'PASSWORD': parsed.password,
+        'HOST': parsed.hostname,
+        'PORT': parsed.port or '5432',
     }
-}
+
+# Try to parse DATABASE_URL first, then fall back to individual variables
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES = {'default': parse_database_url(DATABASE_URL)}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('POSTGRES_DB', 'docverify'),
+            'USER': os.environ.get('POSTGRES_USER', 'docverify'),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
+            'HOST': os.environ.get('DATABASE_HOST', 'localhost'),
+            'PORT': os.environ.get('DATABASE_PORT', '5432'),
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
