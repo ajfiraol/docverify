@@ -105,14 +105,12 @@ jobs:
             curl -s "https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml" > ~/docverify/docker-compose.yml
 
             # Create .env with actual values
-            cat > ~/docverify/.env << 'EOF'
-DJANGO_SECRET_KEY=production-secret-key-12345678
-DJANGO_DEBUG=False
-DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
-POSTGRES_DB=docverify
-POSTGRES_USER=docverify
-POSTGRES_PASSWORD=docverify123
-EOF
+            echo "DJANGO_SECRET_KEY=production-secret-key-12345678" > ~/docverify/.env
+            echo "DJANGO_DEBUG=False" >> ~/docverify/.env
+            echo "DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1" >> ~/docverify/.env
+            echo "POSTGRES_DB=docverify" >> ~/docverify/.env
+            echo "POSTGRES_USER=docverify" >> ~/docverify/.env
+            echo "POSTGRES_PASSWORD=docverify123" >> ~/docverify/.env
 
             # Pull new image
             docker pull "$IMAGE_TAG"
