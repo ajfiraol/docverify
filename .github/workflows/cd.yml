@@ -58,21 +58,20 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ${{ secrets.DOCKER_USERNAME }}/docverify
           tags: |
             type=ref,event=branch
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
       # ---------------------------------------------------------------------
-      # Login to GitHub Container Registry
+      # Login to Docker Hub
       # ---------------------------------------------------------------------
-      - name: Login to GHCR
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       # ---------------------------------------------------------------------
       # Build and Push Image
