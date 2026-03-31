@@ -60,7 +60,6 @@ jobs:
         with:
           images: ${{ secrets.DOCKER_USERNAME }}/docverify
           tags: |
-            type=ref,event=branch
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
@@ -117,7 +116,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           script: |
-            # Variables from GitHub
+            # Get the first tag only
             IMAGE_TAG="${{ needs.build-and-push.outputs.image-tag }}"
             echo "Deploying image: $IMAGE_TAG"
 
@@ -137,7 +136,7 @@ jobs:
             sed -i "s|image:.*|image: $IMAGE_TAG|" ~/docverify/docker-compose.yml
 
             # Pull new image
-            docker pull $IMAGE_TAG
+            docker pull "$IMAGE_TAG"
 
             # Run migrations
             docker compose -f ~/docverify/docker-compose.yml run --rm web python manage.py migrate --noinput
