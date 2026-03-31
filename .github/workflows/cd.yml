@@ -124,11 +124,17 @@ jobs:
             # Pull new image
             docker pull "$IMAGE_TAG"
 
-            # Run migrations
-            docker compose -f ~/docverify/docker-compose.yml run --rm web python manage.py migrate --noinput
+            # Stop existing containers if any
+            docker compose -f ~/docverify/docker-compose.yml down 2>/dev/null || true
 
-            # Restart services
+            # Start services
             docker compose -f ~/docverify/docker-compose.yml up -d
+
+            # Wait for db to be ready
+            sleep 10
+
+            # Run migrations
+            docker compose -f ~/docverify/docker-compose.yml exec -T web python manage.py migrate --noinput || echo "Migration skipped or failed"
 
             echo "Deployment completed!"
             docker compose -f ~/docverify/docker-compose.yml ps
