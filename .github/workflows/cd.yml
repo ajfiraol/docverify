@@ -77,7 +77,6 @@ jobs:
     name: Deploy to VPS
     runs-on: ubuntu-latest
     needs: build-and-push
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
 
     steps:
       # ---------------------------------------------------------------------
@@ -114,12 +113,16 @@ jobs:
 
             # Pull latest docker-compose.yml
             curl -s "https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml" > ~/docverify/docker-compose.yml
-            curl -s "https://raw.githubusercontent.com/${{ github.repository }}/main/.env.example" > ~/docverify/.env
 
-            # Create .env if not exists
-            if [ ! -f ~/docverify/.env ]; then
-              cp ~/docverify/.env.example ~/docverify/.env
-            fi
+            # Create .env with actual values
+            cat > ~/docverify/.env << 'EOF'
+DJANGO_SECRET_KEY=production-secret-key-12345678
+DJANGO_DEBUG=False
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+POSTGRES_DB=docverify
+POSTGRES_USER=docverify
+POSTGRES_PASSWORD=docverify123
+EOF
 
             # Pull new image
             docker pull "$IMAGE_TAG"
