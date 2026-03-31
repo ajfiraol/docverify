@@ -35,8 +35,6 @@ jobs:
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
-    outputs:
-      image-tag: ${{ steps.meta.outputs.tags }}
 
     steps:
       # ---------------------------------------------------------------------
@@ -116,8 +114,10 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           script: |
-            # Get the first tag only
-            IMAGE_TAG="${{ needs.build-and-push.outputs.image-tag }}"
+            # Build image tag using branch and SHA
+            DOCKER_USERNAME="${{ secrets.DOCKER_USERNAME }}"
+            SHORT_SHA="${{ github.sha }}"
+            IMAGE_TAG="$DOCKER_USERNAME/docverify:master-$SHORT_SHA"
             echo "Deploying image: $IMAGE_TAG"
 
             # Create deployment directory
